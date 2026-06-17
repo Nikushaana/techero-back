@@ -75,7 +75,6 @@ export class AuthService {
             secure: true,
             httpOnly: true,
             sameSite: 'lax' as const,
-            domain: '.techero.ge',
             path: '/',
         };
     }
