@@ -71,12 +71,21 @@ export class AuthService {
     ) { }
 
     private getCookieOptions() {
-        return {
+        const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+
+        const options: any = {
             httpOnly: true,
             path: '/',
-            secure: true,
+            secure: true, // Must be true in production
             sameSite: 'lax' as const,
         };
+
+        if (isProduction) {
+            // This allows cookies to be shared between api.techero.ge and techero.ge
+            options.domain = '.techero.ge';
+        }
+
+        return options;
     }
 
     // send and verify sent code
