@@ -72,11 +72,11 @@ export class AuthService {
 
     private getCookieOptions() {
         return {
+            secure: true,
             httpOnly: true,
-            path: '/',
-            secure: false,
             sameSite: 'lax' as const,
             domain: '.techero.ge',
+            path: '/',
         };
     }
 
