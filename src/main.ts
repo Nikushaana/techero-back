@@ -9,7 +9,7 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.enableCors({
-    origin: ['http://dev.techero.ge:3000', 'https://techero.ge'],
+    origin: ['http://localhost:3000', 'https://techero.ge'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true,
   });
