@@ -14,7 +14,7 @@ export class UploadsService {
   }
 
   async uploadImage(file: Express.Multer.File, subFolder: string, maxWidth = 1200): Promise<string> {
-    if (!file.mimetype.startsWith('image/')) {
+    if (!file.mimetype.startsWith('image/')) { 
       throw new BadRequestException('Invalid file type. Expected an image.');
     }
 
