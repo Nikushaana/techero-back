@@ -10,7 +10,7 @@ export class UploadsService {
   private readonly baseUploadPath: string;
 
   constructor(private configService: ConfigService) {
-    this.baseUploadPath = this.configService.get<string>('VOLUME_PATH') || '/app/data/uploads';
+    this.baseUploadPath = this.configService.get<string>('VOLUME_PATH') || '/app/uploads';
   }
 
   async uploadImage(file: Express.Multer.File, subFolder: string, maxWidth = 1200): Promise<string> {
