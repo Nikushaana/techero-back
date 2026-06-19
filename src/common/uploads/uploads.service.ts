@@ -80,9 +80,7 @@ export class UploadsService {
             resolve(path.posix.join('uploads', subFolder, fileName));
           }
         })
-        .on('error', async (err, stdout, stderr) => {
-          console.error('FFmpeg Error:', err.message);
-          console.error('FFmpeg Stderr Output:', stderr);
+        .on('error', async (err) => {
           await fs.remove(tempInputPath).catch(() => { });
           reject(new BadRequestException(`Video compression failed: ${err.message}`));
         })
