@@ -12,7 +12,7 @@ async function bootstrap() {
   app.useStaticAssets('/app/data/uploads', {
     prefix: '/uploads/',
   });
-  
+
   app.enableCors({
     origin: ['http://localhost:3000', 'https://techero.ge'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
@@ -32,6 +32,6 @@ async function bootstrap() {
   await app.listen(port, '0.0.0.0');
 
   console.log(`connected on port ` + port);
-
+ 
 }
 bootstrap();
