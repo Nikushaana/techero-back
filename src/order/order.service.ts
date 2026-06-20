@@ -119,134 +119,128 @@ export class OrderService {
 
     // individual and company
     async createOrder(userId: number, repo: any, createOrderDto: CreateOrderDto, images: Express.Multer.File[] = [], videos: Express.Multer.File[] = []) {
-        try {
-            const user = await this.baseUserService.getUser(userId, repo);
+        const user = await this.baseUserService.getUser(userId, repo);
 
-            const category = await this.categoryRepo.findOne({ where: { id: createOrderDto.categoryId, status: true } });
-            if (!category) throw new NotFoundException('Category not found');
+        const category = await this.categoryRepo.findOne({ where: { id: createOrderDto.categoryId, status: true } });
+        if (!category) throw new NotFoundException('Category not found');
 
-            const relationKey = "companyName" in user ? "company" : "individual";
+        const relationKey = "companyName" in user ? "company" : "individual";
 
-            const address = await this.addressRepo.findOne({ where: { id: createOrderDto.addressId, [relationKey]: { id: userId } } });
-            if (!address) throw new NotFoundException('Address not found');
+        const address = await this.addressRepo.findOne({ where: { id: createOrderDto.addressId, [relationKey]: { id: userId } } });
+        if (!address) throw new NotFoundException('Address not found');
 
-            const branches = await this.branchesService.getBranches({ page: 1 });
-            if (!branches.total) throw new BadRequestException('No branches available — cannot add order');
+        const branches = await this.branchesService.getBranches({ page: 1 });
+        if (!branches.total) throw new BadRequestException('No branches available — cannot add order');
 
-            // Check if location is within any branch coverage
-            const isWithinCoverage = branches?.data?.some((branch) => {
-                const distance = getDistanceFromLatLonInKm(
-                    address.location.lat,
-                    address.location.lng,
-                    branch.location.lat,
-                    branch.location.lng
-                );
-                return distance <= branch.coverage_radius_km;
-            });
+        // Check if location is within any branch coverage
+        const isWithinCoverage = branches?.data?.some((branch) => {
+            const distance = getDistanceFromLatLonInKm(
+                address.location.lat,
+                address.location.lng,
+                branch.location.lat,
+                branch.location.lng
+            );
+            return distance <= branch.coverage_radius_km;
+        });
 
-            if (!isWithinCoverage) {
-                throw new BadRequestException(
-                    'Address is outside all branch coverage areas. Please choose a closer location.'
+        if (!isWithinCoverage) {
+            throw new BadRequestException(
+                'Address is outside all branch coverage areas. Please choose a closer location.'
+            );
+        }
+
+        const order = this.orderRepo.create({
+            ...createOrderDto,
+            category,
+            address
+        });
+
+        if ("companyName" in user) {
+            order.company = user;
+        } else {
+            order.individual = user;
+        }
+
+        await this.orderRepo.save(order);
+
+        // Upload media if any
+        let newUploadedImagesUrls: string[] = [];
+        let newUploadedVideosUrls: string[] = [];
+
+        if ((images && images.length > 0) || (videos && videos.length > 0)) {
+            const subFolder = `orders/${order.id}`;
+
+            if (images.length > 0) {
+                newUploadedImagesUrls = await Promise.all(
+                    images.map((file) => this.uploadsService.uploadImage(file, subFolder, 800))
                 );
             }
 
-            const order = this.orderRepo.create({
-                ...createOrderDto,
-                category,
-                address
-            });
-
-            if ("companyName" in user) {
-                order.company = user;
-            } else {
-                order.individual = user;
+            if (videos.length > 0) {
+                newUploadedVideosUrls = await Promise.all(
+                    videos.map((file) => this.uploadsService.uploadVideo(file, subFolder))
+                );
             }
+
+            order.images = newUploadedImagesUrls;
+            order.videos = newUploadedVideosUrls;
 
             await this.orderRepo.save(order);
-
-            // Upload media if any
-            let newUploadedImagesUrls: string[] = [];
-            let newUploadedVideosUrls: string[] = [];
-
-            if ((images && images.length > 0) || (videos && videos.length > 0)) {
-                const subFolder = `orders/${order.id}`;
-
-                if (images.length > 0) {
-                    newUploadedImagesUrls = await Promise.all(
-                        images.map((file) => this.uploadsService.uploadImage(file, subFolder, 800))
-                    );
-                }
-
-                if (videos.length > 0) {
-                    newUploadedVideosUrls = await Promise.all(
-                        videos.map((file) => this.uploadsService.uploadVideo(file, subFolder))
-                    );
-                }
-
-                order.images = newUploadedImagesUrls;
-                order.videos = newUploadedVideosUrls;
-
-                await this.orderRepo.save(order);
-            }
-
-            // Calculate price
-            const { price } = await this.pricingService.calculatePrice({
-                addressId: createOrderDto.addressId,
-                service_type: createOrderDto.service_type,
-            });
-
-            const serviceTypeLabel =
-                OrderTypeLabelsGeorgian[order.service_type] || order.service_type;
-
-            // Create invoice
-            const invoice = await this.invoiceService.createInvoice({
-                orderId: order.id,
-                amount: price,
-                type: InvoiceType.CREATE_ORDER,
-            });
-
-            // Create transaction for this order creating
-            const transaction = await this.transactionsService.createTransaction({
-                amount: price,
-                reason: `შეკვეთა №${order.id} შექმნისთვის გადახდა`,
-                type: TransactionType.DEBIT,
-                provider: PaymentProvider.BOG,
-                individualId: "companyName" in user ? undefined : user.id,
-                companyId: "companyName" in user ? user.id : undefined,
-                orderId: order.id
-            });
-
-            // send notification to admin
-            await this.notificationService.sendNotification(
-                `შეკვეთა №${order.id}: დაემატა "${serviceTypeLabel}"-ს შესახებ და მომსახურების დასაწყებად საჭიროა გადახდა.`,
-                NotificationType.NEW_ORDER,
-                'admin',
-                undefined,
-                {
-                    order_id: order.id
-                },
-            );
-
-            // send notification to user
-            await this.notificationService.sendNotification(
-                `შეკვეთა №${order.id}: დაემატა "${serviceTypeLabel}"-ს შესახებ და მომსახურების დასაწყებად საჭიროა გადახდა.`,
-                NotificationType.NEW_ORDER,
-                user.role,
-                userId,
-                {
-                    order_id: order.id
-                },
-            );
-
-            // mocked payment
-            await this.paymentService.mockPayOrder(transaction.id, invoice.id);
-
-            return { message: `Order created successfully`, order: instanceToPlain(order) };
-        } catch (error) {
-            // THIS IS THE KEY: We need to see what the error actually is
-            console.error("CRITICAL ERROR IN CREATE ORDER:", error);
-            throw error; // Let NestJS handle the 500, but now it's logged!
         }
+
+        // Calculate price
+        const { price } = await this.pricingService.calculatePrice({
+            addressId: createOrderDto.addressId,
+            service_type: createOrderDto.service_type,
+        });
+
+        const serviceTypeLabel =
+            OrderTypeLabelsGeorgian[order.service_type] || order.service_type;
+
+        // Create invoice
+        const invoice = await this.invoiceService.createInvoice({
+            orderId: order.id,
+            amount: price,
+            type: InvoiceType.CREATE_ORDER,
+        });
+
+        // Create transaction for this order creating
+        const transaction = await this.transactionsService.createTransaction({
+            amount: price,
+            reason: `შეკვეთა №${order.id} შექმნისთვის გადახდა`,
+            type: TransactionType.DEBIT,
+            provider: PaymentProvider.BOG,
+            individualId: "companyName" in user ? undefined : user.id,
+            companyId: "companyName" in user ? user.id : undefined,
+            orderId: order.id
+        });
+
+        // send notification to admin
+        await this.notificationService.sendNotification(
+            `შეკვეთა №${order.id}: დაემატა "${serviceTypeLabel}"-ს შესახებ და მომსახურების დასაწყებად საჭიროა გადახდა.`,
+            NotificationType.NEW_ORDER,
+            'admin',
+            undefined,
+            {
+                order_id: order.id
+            },
+        );
+
+        // send notification to user
+        await this.notificationService.sendNotification(
+            `შეკვეთა №${order.id}: დაემატა "${serviceTypeLabel}"-ს შესახებ და მომსახურების დასაწყებად საჭიროა გადახდა.`,
+            NotificationType.NEW_ORDER,
+            user.role,
+            userId,
+            {
+                order_id: order.id
+            },
+        );
+
+        // mocked payment
+        await this.paymentService.mockPayOrder(transaction.id, invoice.id);
+
+        return { message: `Order created successfully`, order: instanceToPlain(order) };
     }
 
     async getOrders(dto: GetOrdersDto, userId: number, repo: any) {
