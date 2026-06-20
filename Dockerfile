@@ -1,38 +1,24 @@
-# Stage 1: Build
-FROM node:20-slim AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
-
-# Stage 2: Production
+# Use a slim image to keep things fast
 FROM node:20-slim
-WORKDIR /app
 
-# Install FFmpeg and Puppeteer dependencies
-RUN apt-get update && apt-get install -y \
+# Set non-interactive mode so it doesn't wait for user input
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Combine all updates and installs into ONE layer
+RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
-    wget \
-    gnupg \
     ca-certificates \
-    procps \
+    wget \
+    # Add these specifically if you use Puppeteer
     libxss1 \
     libnss3 \
     libatk-bridge2.0-0 \
     libgtk-3-0 \
     libgbm1 \
-    --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy production dependencies and build artifacts
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-COPY package*.json ./
-
-# Set production environment
-ENV NODE_ENV=production
-EXPOSE 4000
-
-# Start the application
+WORKDIR /app
+COPY . .
+RUN npm install
+RUN npm run build
 CMD ["node", "dist/main.js"]
