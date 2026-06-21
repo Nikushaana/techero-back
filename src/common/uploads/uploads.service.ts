@@ -34,6 +34,9 @@ export class UploadsService {
   }
 
   async uploadVideo(file: Express.Multer.File, subFolder: string): Promise<string> {
+    console.log("video uploading");
+    
+
     if (!file.mimetype.startsWith('video/')) {
       throw new BadRequestException('Invalid file type. Expected a video.');
     }
