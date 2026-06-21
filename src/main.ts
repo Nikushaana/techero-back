@@ -5,7 +5,10 @@ import cookieParser from 'cookie-parser';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    // This tells NestJS to log errors to the console in detail
+    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+  });
 
   app.use(cookieParser());
 
@@ -29,11 +32,9 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 4000;
 
-  const server = await app.listen(port, '0.0.0.0');
+  await app.listen(port, '0.0.0.0');
 
-  server.setTimeout(60000);
-  
   console.log(`connected on port ` + port);
- 
+
 }
 bootstrap();
