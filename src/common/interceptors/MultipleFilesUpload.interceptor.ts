@@ -14,7 +14,7 @@ export const MultipleFilesUpload = (fields: UploadFields[]) =>
         {
             storage: memoryStorage(),
             limits: {
-                fileSize: 1 * 1024 * 1024, // 30MB
+                fileSize: 30 * 1024 * 1024, // 30MB
             },
             fileFilter: (req, file, cb) => {
                 const fieldConfig = fields.find(f => f.name === file.fieldname);
