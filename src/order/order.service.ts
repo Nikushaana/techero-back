@@ -119,6 +119,8 @@ export class OrderService {
 
     // individual and company
     async createOrder(userId: number, repo: any, createOrderDto: CreateOrderDto, images: Express.Multer.File[] = [], videos: Express.Multer.File[] = []) {
+        console.log("order in progress");
+        
         const user = await this.baseUserService.getUser(userId, repo);
 
         const category = await this.categoryRepo.findOne({ where: { id: createOrderDto.categoryId, status: true } });
