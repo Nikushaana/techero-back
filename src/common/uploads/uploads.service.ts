@@ -77,6 +77,7 @@ export class UploadsService {
         .on('end', async () => {
           try {
             await fs.remove(tempInputPath);
+            console.log(`Video compression successful: ${fileName}`);
             resolve(path.posix.join('uploads', subFolder, fileName));
           } catch (cleanupErr) {
             console.error('Failed to clean up temporary video file:', cleanupErr);
