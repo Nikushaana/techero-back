@@ -119,6 +119,7 @@ export class OrderService {
 
     // individual and company
     async createOrder(userId: number, repo: any, createOrderDto: CreateOrderDto, images: Express.Multer.File[] = [], videos: Express.Multer.File[] = []) {
+        try {
         const user = await this.baseUserService.getUser(userId, repo);
 
         const category = await this.categoryRepo.findOne({ where: { id: createOrderDto.categoryId, status: true } });
@@ -240,7 +241,14 @@ export class OrderService {
         // mocked payment
         await this.paymentService.mockPayOrder(transaction.id, invoice.id);
 
+        console.log(`Order created successfully for order ID: ${order.id}`);
+
         return { message: `Order created successfully`, order: instanceToPlain(order) };
+        } catch (error) {
+        // This will log ANY error that happens during the process
+        console.error('CRITICAL ERROR in createOrder:', error);
+        throw error; // Re-throw so the user still gets the 500/400 response
+    }
     }
 
     async getOrders(dto: GetOrdersDto, userId: number, repo: any) {
