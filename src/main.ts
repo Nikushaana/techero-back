@@ -5,11 +5,10 @@ import cookieParser from 'cookie-parser';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    // This tells NestJS to log errors to the console in detail
-    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
-  });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  console.log("--- THE SERVER HAS STARTED AND IS RUNNING ---");
+  
   app.use(cookieParser());
 
   app.useStaticAssets('/app/data/uploads', {
@@ -35,6 +34,6 @@ async function bootstrap() {
   await app.listen(port, '0.0.0.0');
 
   console.log(`connected on port ` + port);
-
+ 
 }
 bootstrap();
