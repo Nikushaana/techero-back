@@ -7,8 +7,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  console.log("--- THE SERVER HAS STARTED AND IS RUNNING ---");
-  
   app.use(cookieParser());
 
   app.useStaticAssets('/app/data/uploads', {
@@ -34,6 +32,5 @@ async function bootstrap() {
   await app.listen(port, '0.0.0.0');
 
   console.log(`connected on port ` + port);
- 
 }
 bootstrap();

@@ -34,9 +34,6 @@ export class UploadsService {
   }
 
   async uploadVideo(file: Express.Multer.File, subFolder: string): Promise<string> {
-    console.log("video uploading");
-    
-
     if (!file.mimetype.startsWith('video/')) {
       throw new BadRequestException('Invalid file type. Expected a video.');
     }
@@ -77,7 +74,6 @@ export class UploadsService {
         .on('end', async () => {
           try {
             await fs.remove(tempInputPath);
-            console.log(`Video compression successful: ${fileName}`);
             resolve(path.posix.join('uploads', subFolder, fileName));
           } catch (cleanupErr) {
             console.error('Failed to clean up temporary video file:', cleanupErr);
