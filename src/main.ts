@@ -29,10 +29,8 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 4000;
 
-  const server = await app.listen(port, '0.0.0.0');
+  await app.listen(port, '0.0.0.0');
 
-  server.setTimeout(300000);
-  
   console.log(`connected on port ` + port);
 }
 bootstrap();
