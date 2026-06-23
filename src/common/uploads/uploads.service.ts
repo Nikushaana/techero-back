@@ -104,6 +104,7 @@ export class UploadsService {
   try {
     // Write the buffer directly to the destination
     await fs.writeFile(fullPath, file.buffer);
+    console.log("video file saved");
     
     return path.posix.join('uploads', subFolder, fileName);
   } catch (err) {
