@@ -25,7 +25,7 @@ export class UploadsService {
     const fileName = `img-${uniqueSuffix}.webp`;
     const fullPath = path.join(targetFolder, fileName);
 
-    await sharp(file.path)
+    await sharp(file.buffer)
       .resize({ width: maxWidth, withoutEnlargement: true })
       .webp({ quality: 80 })
       .toFile(fullPath);
@@ -89,31 +89,27 @@ export class UploadsService {
   // }
 
   async uploadVideo(file: Express.Multer.File, subFolder: string): Promise<string> {
-    if (!file.mimetype.startsWith('video/')) {
-      throw new BadRequestException('Invalid file type. Expected a video.');
-    }
-
-    // 1. Ensure the destination folder exists
-    const targetFolder = path.join(this.baseUploadPath, subFolder);
-    await fs.ensureDir(targetFolder);
-
-    // 2. Define the permanent file path
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const fileName = `vid-${uniqueSuffix}${path.extname(file.originalname)}`;
-    const fullPath = path.join(targetFolder, fileName);
-
-    try {
-      // 3. Move the file from the temp storage to your Hetzner volume
-      // fs.move is faster than writing a buffer because it's just a file system pointer rename
-      await fs.move(file.path, fullPath);
-
-      console.log(`Video moved to: ${fullPath}`);
-      return path.posix.join('uploads', subFolder, fileName);
-    } catch (err) {
-      console.error("Error moving video file:", err);
-      throw new InternalServerErrorException('Could not save the video file.');
-    }
+  if (!file.mimetype.startsWith('video/')) {
+    throw new BadRequestException('Invalid file type. Expected a video.');
   }
+
+  const targetFolder = path.join(this.baseUploadPath, subFolder);
+  await fs.ensureDir(targetFolder);
+
+  // Use the original filename or generate a unique one as needed
+  const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+  const fileName = `vid-${uniqueSuffix}${path.extname(file.originalname)}`;
+  const fullPath = path.join(targetFolder, fileName);
+
+  try {
+    // Write the buffer directly to the destination
+    await fs.writeFile(fullPath, file.buffer);
+    
+    return path.posix.join('uploads', subFolder, fileName);
+  } catch (err) {
+    throw new InternalServerErrorException('Could not save the video file.');
+  }
+}
 
   async deleteFile(relativeFilePath: string): Promise<void> {
     if (!relativeFilePath) return;
