@@ -1,6 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { memoryStorage } from 'multer';
+import { diskStorage } from 'multer';
+import * as path from 'path';
 
 interface UploadFields {
     name: string;
@@ -12,7 +13,15 @@ export const MultipleFilesUpload = (fields: UploadFields[]) =>
     FileFieldsInterceptor(
         fields.map(f => ({ name: f.name, maxCount: f.maxCount })),
         {
-            storage: memoryStorage(),
+            storage: diskStorage({
+                destination: (req, file, cb) => {
+                    cb(null, '/tmp');
+                },
+                filename: (req, file, cb) => {
+                    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+                    cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
+                }
+            }),
             limits: {
                 fileSize: 30 * 1024 * 1024, // 30MB
             },
