@@ -311,7 +311,6 @@ export class OrderService {
 
     async updateOneOrder(userId: number, id: number, repo: any, updateUserOrderDto: UpdateUserOrderDto, images: Express.Multer.File[] = [], videos: Express.Multer.File[] = []) {
         const user = await this.baseUserService.getUser(userId, repo);
-console.log("start update");
 
         const relationKey = "companyName" in user ? "company" : "individual";
 

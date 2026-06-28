@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import * as fs from 'fs-extra';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -13,8 +12,6 @@ async function bootstrap() {
   app.useStaticAssets('/app/data/uploads', {
     prefix: '/uploads/',
   });
-
-  await fs.emptyDir('./temp/uploads');
 
   app.enableCors({
     origin: ['http://localhost:3000', 'https://techero.ge'],

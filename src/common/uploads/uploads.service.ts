@@ -35,7 +35,6 @@ export class UploadsService {
   async uploadVideo(file: Express.Multer.File, subFolder: string): Promise<string> {
     const targetFolder = path.join(this.baseUploadPath, subFolder);
     await fs.ensureDir(targetFolder);
-    console.log("uploading");
 
     const fileName = `vid-${Date.now()}.mp4`;
     const fullPath = path.join(targetFolder, fileName);
