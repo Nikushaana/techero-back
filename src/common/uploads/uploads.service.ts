@@ -10,7 +10,7 @@ export class UploadsService {
   private readonly baseUploadPath: string;
 
   constructor(private configService: ConfigService) {
-    this.baseUploadPath = this.configService.get<string>('VOLUME_PATH') || '/app/data/uploads';
+    this.baseUploadPath = this.configService.get<string>('VOLUME_PATH') || '/app/uploads';
   }
 
   async uploadImage(file: Express.Multer.File, subFolder: string, maxWidth = 1200): Promise<string> {
@@ -46,7 +46,7 @@ export class UploadsService {
 
         // 1. Only downscale IF the video is larger than 720p. 
         // This prevents small clips from expanding to fill 1280x720 pixels.
-        .size('1280x720')
+        .size('?x720')
         .autopad()
 
         .outputOptions([

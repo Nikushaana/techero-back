@@ -9,7 +9,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  app.useStaticAssets('/app/data/uploads', {
+  app.useStaticAssets('/app/uploads', {
     prefix: '/uploads/',
   });
 
