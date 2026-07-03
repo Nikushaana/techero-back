@@ -177,9 +177,10 @@ export class OrderService {
             }
 
             if (videos.length > 0) {
-                newUploadedVideosUrls = await Promise.all(
-                    videos.map((file) => this.uploadsService.uploadVideo(file, subFolder))
-                );
+                // newUploadedVideosUrls = await Promise.all(
+                //     videos.map((file) => this.uploadsService.uploadVideo(file, subFolder))
+                // );
+                console.log("video uploaded");
             }
 
             order.images = newUploadedImagesUrls;
@@ -404,11 +405,12 @@ export class OrderService {
             );
         }
         if (videos && videos.length > 0) {
-            const subFolder = `orders/${id}`;
+            // const subFolder = `orders/${id}`;
 
-            newUploadedVideosUrls = await Promise.all(
-                videos.map((file) => this.uploadsService.uploadVideo(file, subFolder))
-            );
+            // newUploadedVideosUrls = await Promise.all(
+            //     videos.map((file) => this.uploadsService.uploadVideo(file, subFolder))
+            // );
+            console.log("video uploaded");
         }
 
         const { categoryId, ...rest } = updateUserOrderDto;
