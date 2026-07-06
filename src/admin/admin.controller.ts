@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UploadedFiles, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
 import { TokenValidationGuard } from 'src/auth/guards/token-validation.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RolesGuard } from 'src/common/guards/roles.guard';
@@ -34,6 +34,7 @@ import { GetFaqsDto } from 'src/faq/dto/get-faqs.dto';
 import { GetBranchesDto } from 'src/branches/dto/get-branches.dto';
 import { GetUsersDto } from 'src/common/services/base-user/dto/get-users.dto';
 import { MultipleFilesUpload } from 'src/common/interceptors/MultipleFilesUpload.interceptor';
+import { MulterExceptionFilter } from 'src/common/interceptors/multer-exception.filter';
 
 @Controller('admin')
 export class AdminController {
@@ -204,6 +205,7 @@ export class AdminController {
     @Roles('admin')
     @Patch('categories/:id')
     @UseInterceptors(MultipleImagesUpload('images', 1))
+    @UseFilters(MulterExceptionFilter)
     async updateOneCategory(@Param('id', ParseIntPipe) id: number, @Body() updateCategoryDto: UpdateCategoryDto, @UploadedFiles() images: Express.Multer.File[]) {
         return this.categoryService.updateOneCategory(id, updateCategoryDto, images);
     }
