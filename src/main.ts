@@ -15,7 +15,6 @@ async function bootstrap() {
   });
 
   app.use(json({ limit: '30mb' }));
-
   app.use(urlencoded({ extended: true, limit: '30mb' }));
 
   app.enableCors({
@@ -33,12 +32,6 @@ async function bootstrap() {
   );
 
   const port = process.env.PORT ?? 4000;
-
-  app.useGlobalFilters({
-    catch(exception, host) {
-      console.error('CRITICAL ERROR CAUGHT:', exception);
-    }
-  } as any);
 
   await app.listen(port, '0.0.0.0');
 

@@ -20,13 +20,22 @@ export class UploadsService {
     const fileName = `img-${Date.now()}.webp`;
     const fullPath = path.join(targetFolder, fileName);
 
-    await sharp(file.buffer)
-      .resize({ width: maxWidth, withoutEnlargement: true })
-      .webp({ quality: 80, effort: 6 })
-      .toFile(fullPath);
+    try {
+      // Read from the path Multer created on your volume
+      await sharp(file.path)
+        .resize({ width: maxWidth, withoutEnlargement: true })
+        .webp({ quality: 80, effort: 6 })
+        .toFile(fullPath);
 
+      // ALWAYS delete the raw temp file to save space
+      await fs.remove(file.path);
 
-    return path.posix.join('uploads', subFolder, fileName);
+      return path.posix.join('uploads', subFolder, fileName);
+    } catch (error) {
+      // Clean up even if sharp fails to prevent disk bloat
+      if (await fs.pathExists(file.path)) await fs.remove(file.path);
+      throw error;
+    }
   }
 
   // async uploadVideo(file: Express.Multer.File, subFolder: string): Promise<string> {
