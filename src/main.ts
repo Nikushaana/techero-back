@@ -34,6 +34,12 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 4000;
 
+  app.useGlobalFilters({
+    catch(exception, host) {
+      console.error('CRITICAL ERROR CAUGHT:', exception);
+    }
+  } as any);
+
   await app.listen(port, '0.0.0.0');
 
   console.log(`connected on port ` + port);
