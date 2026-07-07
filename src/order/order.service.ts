@@ -172,15 +172,14 @@ export class OrderService {
 
             if (images.length > 0) {
                 newUploadedImagesUrls = await Promise.all(
-                    images.map((file) => this.uploadsService.uploadImage(file, subFolder, 800))
+                    images.map((file) => this.uploadsService.uploadImage(file, subFolder))
                 );
             }
 
             if (videos.length > 0) {
-                // newUploadedVideosUrls = await Promise.all(
-                //     videos.map((file) => this.uploadsService.uploadVideo(file, subFolder))
-                // );
-                console.log("video uploaded");
+                newUploadedVideosUrls = await Promise.all(
+                    videos.map((file) => this.uploadsService.uploadVideo(file, subFolder))
+                );
             }
 
             order.images = newUploadedImagesUrls;
@@ -401,16 +400,15 @@ export class OrderService {
             const subFolder = `orders/${id}`;
 
             newUploadedImagesUrls = await Promise.all(
-                images.map((file) => this.uploadsService.uploadImage(file, subFolder, 800))
+                images.map((file) => this.uploadsService.uploadImage(file, subFolder))
             );
         }
         if (videos && videos.length > 0) {
-            // const subFolder = `orders/${id}`;
+            const subFolder = `orders/${id}`;
 
-            // newUploadedVideosUrls = await Promise.all(
-            //     videos.map((file) => this.uploadsService.uploadVideo(file, subFolder))
-            // );
-            console.log("video uploaded");
+            newUploadedVideosUrls = await Promise.all(
+                videos.map((file) => this.uploadsService.uploadVideo(file, subFolder))
+            );
         }
 
         const { categoryId, ...rest } = updateUserOrderDto;

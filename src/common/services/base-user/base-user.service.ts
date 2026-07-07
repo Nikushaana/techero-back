@@ -231,7 +231,7 @@ export class BaseUserService {
             const subFolder = `${user.role}/${userId}`;
 
             newUploadedUrls = await Promise.all(
-                images.map((file) => this.uploadsService.uploadImage(file, subFolder, 800))
+                images.map((file) => this.uploadsService.uploadImage(file, subFolder))
             );
         }
 

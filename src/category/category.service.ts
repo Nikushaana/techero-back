@@ -100,7 +100,7 @@ export class CategoryService {
             const subFolder = `categories/${id}`;
 
             newUploadedUrls = await Promise.all(
-                images.map((file) => this.uploadsService.uploadImage(file, subFolder, 800))
+                images.map((file) => this.uploadsService.uploadImage(file, subFolder))
             );
         }
 
