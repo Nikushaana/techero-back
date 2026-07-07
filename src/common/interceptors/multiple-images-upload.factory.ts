@@ -6,7 +6,7 @@ export const MultipleImagesUpload = (field: string, maxCount = 1) =>
     FilesInterceptor(field, maxCount, {
         storage: memoryStorage(),
         limits: {
-            fileSize: 15 * 1024 * 1024, // 15 MB
+            fileSize: 18 * 1024 * 1024, // 18 MB
         },
         fileFilter: (req, file, cb) => {
             if (!file.mimetype.startsWith('image/')) {
