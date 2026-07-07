@@ -26,7 +26,7 @@ export class UploadsService {
       .webp({ quality: 80 })
       .toFile(fullPath);
 
-    return fileName;
+    return path.posix.join('uploads', subFolder, fileName);
   }
 
   async uploadVideo(file: Express.Multer.File, subFolder: string): Promise<string> {
@@ -55,7 +55,6 @@ export class UploadsService {
         .audioCodec('aac')
         .audioBitrate('64k')
         .on('end', () => {
-          // No need to delete file.path since it was in memory!
           resolve(path.posix.join('uploads', subFolder, fileName));
         })
         .on('error', (err) => {
